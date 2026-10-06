@@ -2,7 +2,7 @@
 
 **The customer lifecycle operating system for home-service businesses.**
 
-[Architecture](#architecture) · [API](#api-surface) · [Local setup](#local-development)
+[Live preview](https://homeserve-os.netlify.app/) · [Architecture](#architecture) · [API](#api-surface) · [Local setup](#local-development)
 
 HomeServe OS is a multi-tenant SaaS platform for plumbers, HVAC companies, electricians, contractors, cleaners, landscapers, and other field-service teams. It connects lead capture, AI qualification, scheduling, dispatch, job execution, invoicing, payments, reputation, and follow-up automation in one calm workspace.
 
