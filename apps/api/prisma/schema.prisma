@@ -1,0 +1,15 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+enum LeadStatus { NEW QUALIFYING QUALIFIED SCHEDULED LOST }
+enum JobStatus { SCHEDULED DISPATCHED EN_ROUTE IN_PROGRESS COMPLETED CANCELLED }
+enum PaymentStatus { DRAFT SENT PARTIALLY_PAID PAID OVERDUE VOID }
+model Organization { id String @id @default(cuid()); name String; createdAt DateTime @default(now()); customers Customer[]; leads Lead[]; technicians Technician[]; jobs Job[] }
+model Customer { id String @id @default(cuid()); organizationId String; organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade); firstName String; lastName String; email String?; phone String; address String?; createdAt DateTime @default(now()); jobs Job[]; leads Lead[]; communications Communication[]; @@index([organizationId,phone]) }
+model Lead { id String @id @default(cuid()); organizationId String; organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade); customerId String?; customer Customer? @relation(fields:[customerId],references:[id]); source String; serviceType String; status LeadStatus @default(NEW); aiScore Int?; aiSummary String?; createdAt DateTime @default(now()); @@index([organizationId,status,createdAt]) }
+model Technician { id String @id @default(cuid()); organizationId String; organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade); name String; email String @unique; skills String[]; jobs Job[] }
+model Job { id String @id @default(cuid()); organizationId String; organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade); customerId String; customer Customer @relation(fields:[customerId],references:[id]); technicianId String?; technician Technician? @relation(fields:[technicianId],references:[id]); serviceType String; status JobStatus @default(SCHEDULED); startsAt DateTime; endsAt DateTime; notes String?; checklist Json?; media JobMedia[]; invoice Invoice?; @@index([organizationId,startsAt,status]) }
+model JobMedia { id String @id @default(cuid()); jobId String; job Job @relation(fields:[jobId],references:[id],onDelete:Cascade); url String; kind String; createdAt DateTime @default(now()) }
+model Invoice { id String @id @default(cuid()); jobId String @unique; job Job @relation(fields:[jobId],references:[id]); number String @unique; subtotal Decimal @db.Decimal(12,2); tax Decimal @db.Decimal(12,2); total Decimal @db.Decimal(12,2); status PaymentStatus @default(DRAFT); stripePaymentIntentId String?; createdAt DateTime @default(now()) }
+model Communication { id String @id @default(cuid()); customerId String; customer Customer @relation(fields:[customerId],references:[id],onDelete:Cascade); channel String; direction String; body String; createdAt DateTime @default(now()); @@index([customerId,createdAt]) }
+model AutomationRun { id String @id @default(cuid()); workflowKey String; triggerKey String; status String; input Json; output Json?; attempts Int @default(0); nextAttemptAt DateTime?; createdAt DateTime @default(now()); @@index([status,nextAttemptAt]) }
+
